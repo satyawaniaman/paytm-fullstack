@@ -1,11 +1,13 @@
-const { JWT_SECRET } = require("./config");
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "./config.js";
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(403).json({});
+    return res.status(403).json({
+      message: "no token found",
+    });
   }
 
   const token = authHeader.split(" ")[1];
@@ -16,13 +18,13 @@ const authMiddleware = (req, res, next) => {
       req.userId = decoded.userId;
       next();
     } else {
-      return res.status(403).json({});
+      return res.status(403).json({
+        message: "wrong credentials",
+      });
     }
   } catch (err) {
-    return res.status(403).json({});
+    return res.status(403).json({ message: "wrong credentials" });
   }
 };
 
-module.exports = {
-  authMiddleware,
-};
+export { authMiddleware };

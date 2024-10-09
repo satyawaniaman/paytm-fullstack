@@ -1,9 +1,11 @@
-const express = require("express");
+import express from "express";
+import cors from "cors";
+import mainRouter from "./routes/index.js";
+
 const app = express();
-const cors = require("cors");
+
 app.use(cors());
-app.use(express.json());
-const mainRouter = require("./routes/index");
+app.use(express.json()); // Add this line to parse JSON request bodies
 app.use("/api/v1", mainRouter);
 
 app.listen(3000, () => {
