@@ -7,7 +7,7 @@ import { JWT_SECRET } from "../config.js";
 const router = express.Router();
 import { authMiddleware } from "../middleware.js";
 const userSchema = zod.object({
-  username: zod.string(), // Changed from userName to username
+  username: zod.string(),
   firstName: zod.string(),
   lastName: zod.string(),
   password: zod.string(),
@@ -34,22 +34,33 @@ router.post("/signup", async (req, res) => {
     firstName: req.body.firstName,
     lastName: req.body.lastName,
   });
-  const userId = user._id;
-  await Account.create({
-    userId,
-    balance: 1 + Math.random() * 1000,
-  });
-  const token = jwt.sign(
-    {
-      userId,
-    },
-    JWT_SECRET
-  );
 
-  res.json({
-    message: "User created successfully",
-    token: token,
-  });
+  try {
+    await user.save();
+    const userId = user._id;
+
+    await Account.create({
+      userId,
+      balance: 1 + Math.random() * 1000,
+    });
+
+    const token = jwt.sign(
+      {
+        userId,
+      },
+      JWT_SECRET
+    );
+
+    res.json({
+      message: "User created successfully",
+      token: token,
+    });
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).json({
+      message: "Error creating user",
+    });
+  }
 });
 const signinSchema = zod.object({
   username: zod.string(),
@@ -67,6 +78,7 @@ router.post("/signin", async (req, res) => {
     username: req.body.username,
     password: req.body.password,
   });
+  console.log(user);
   if (user) {
     const token = jwt.sign(
       {
